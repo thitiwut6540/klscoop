@@ -55,8 +55,8 @@
                                     <th class="font-normal" width="100px"> ค่าธรรมเนียม<br>สมัครใหม่ </th>
                                     <th class="font-normal" width="100px"> ค่าบำรุง<br>ประจำปี </th>
                                     <th class="font-normal" width="100px"> เงินสงเคราะห์ศพ<br>ล่วงหน้า </th>
-                                    <th class="font-normal" width="100px"> ค่าใช้จ่ายอื่นๆ </th>
-                                    <th class="font-normal" width="100px"> จัดการ </th>
+                                    <!-- <th class="font-normal" width="100px"> ค่าใช้จ่ายอื่นๆ </th> -->
+                                    <th colspan="2" class="font-normal" width=""> จัดการ </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -68,10 +68,15 @@
                                     <td class="text-center"><?php echo number_format($row["assoc_fee"], 0);?></td>
                                     <td class="text-center"><?php echo number_format($row["annual_fee"], 0);?></td>
                                     <td class="text-center"><?php echo number_format($row["fee"], 0);?></td>
-                                    <td class="text-center"><?php echo number_format($row["other_fee"], 0);?></td>
-                                    <td class="text-right">
+                                    <!-- <td class="text-center"><?php echo number_format($row["other_fee"], 0);?></td> -->
+                                    <td width="50" class="text-right">
                                         <a href="<?php echo base_url(PROJECTPATH.'/sp_cremation/'.$path.'/member_type_setting_form?id='.$row["id"]); ?>">
                                             <input type="button" class="btn btn-primary btn_edit" value="แก้ไข"/>
+                                        </a>
+                                    </td>
+                                    <td width="50" class="text-right">
+                                        <a>
+                                            <input type="button" class="btn btn-danger btn_delete" value="ลบ" data-id='<?php echo $row["id"]; ?>'/>
                                         </a>
                                     </td>
                                 </tr>
@@ -88,5 +93,63 @@
 </div>
 
 <script>
+$(".btn_delete").click(function() {
+    var id = $(this).attr('data-id');
 
+
+    swal({
+        title: "ลบประเภทสมาชิก",
+        text: "",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: "ยกเลิก",
+        closeOnConfirm: false,
+        closeOnCancel: true
+    },
+    function(isConfirm) {
+
+        if (isConfirm) {
+            $.ajax({
+                url: base_url+"sp_cremation/<?php echo $path;?>/member_type_setting_delete",
+                method:"post",
+                data: { id: id },
+                dataType:"text",
+                success:function(result) {
+                    // console.log(result)
+                    data = JSON.parse(result);
+                    if(data.action == 'Y'){
+                        swal({
+                            title: "ลบประเภทสมาชิกเรียบร้อย",
+                            text: "",
+                            type: "success",
+                            showCancelButton: false,
+                            confirmButtonColor: '#DD6B55',
+                            confirmButtonText: 'ยืนยัน',
+                            cancelButtonText: "ยกเลิก",
+                            closeOnConfirm: false,
+                            closeOnCancel: true
+                        },
+                        function(isConfirm) {
+                            location.reload();
+                        });
+                    } else {
+                        swal('ไม่สามารถลบประเภทสมาชิกได้', '', 'warning');
+                    }
+
+                },
+                error: function(xhr){
+                    $.unblockUI();
+                    console.log('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                }
+            });
+        }
+        
+    });
+
+
+
+    
+});
 </script>
