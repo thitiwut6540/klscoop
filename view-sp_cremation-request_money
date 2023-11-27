@@ -8,7 +8,7 @@
             }
             th, td {
                 text-align: center;
-            }
+            }        
             .modal-dialog-delete {
                 margin:0 auto;
                 width: 350px;
@@ -17,7 +17,8 @@
             .modal-dialog-account {
                 margin:auto;
                 width: 70%;
-                margin-top:7%;
+                margin-top:2%;
+                margin-bottom:2%;
             }
             .control-label {
                 text-align:right;
@@ -39,6 +40,12 @@
                 padding: 4px !important;
                 width: 35px !important;
                 height: 35px !important; 
+            }
+
+            @media screen and (max-width: 1359px) {
+                .modal-dialog-account {
+                    width: 90%; 
+                }
             }
         </style>
         <h1 style="margin-bottom: 0">ขอรับเงินฌาปนกิจสงเคราะห์</h1>
@@ -133,7 +140,7 @@
         </div>
     </div>
 </div>
-<div id="add_madal" tabindex="-1" role="dialog" class="modal fade" style="padding-bottom:50px;">
+<div id="add_madal" tabindex="-1" role="dialog" class="modal fade">
     <div class="modal-dialog modal-dialog-account">
         <div class="modal-content">
             <div class="modal-header modal-header-confirmSave">
@@ -212,7 +219,7 @@
                             </div>
                             <label class="col-sm-1 control-label">จำนวนเงิน</label>
                             <div class="col-sm-2">
-                                <input id="p1_beneficiary_amount_01" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="">
+                                <input id="p1_beneficiary_amount_01" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="" onchange="calc_period_payment()">
                             </div>
                         </div>
                     </div>
@@ -224,7 +231,7 @@
                             </div>
                             <label class="col-sm-1 control-label">จำนวนเงิน</label>
                             <div class="col-sm-2">
-                                <input id="p1_beneficiary_amount_02" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="">
+                                <input id="p1_beneficiary_amount_02" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="" onchange="calc_period_payment()">
                             </div>
                         </div>
                     </div>
@@ -236,7 +243,7 @@
                             </div>
                             <label class="col-sm-1 control-label">จำนวนเงิน</label>
                             <div class="col-sm-2">
-                                <input id="p1_beneficiary_amount_03" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="">
+                                <input id="p1_beneficiary_amount_03" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="" onchange="calc_period_payment()">
                             </div>
                         </div>
                     </div>
@@ -248,7 +255,7 @@
                             </div>
                             <label class="col-sm-1 control-label">จำนวนเงิน</label>
                             <div class="col-sm-2">
-                                <input id="p1_beneficiary_amount_04" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="">
+                                <input id="p1_beneficiary_amount_04" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="" onchange="calc_period_payment()">
                             </div>
                         </div>
                     </div>
@@ -260,7 +267,7 @@
                             </div>
                             <label class="col-sm-1 control-label">จำนวนเงิน</label>
                             <div class="col-sm-2">
-                                <input id="p1_beneficiary_amount_05" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="">
+                                <input id="p1_beneficiary_amount_05" name="p1_beneficiary_amount[]" class="form-control m-b-1 type_input" type="text" value="" onchange="calc_period_payment()">
                             </div>
                         </div>
                     </div>
@@ -270,6 +277,7 @@
                             <label class="col-sm-4 control-label">รวม</label>
                             <div class="col-sm-2">
                                 <input id="p1_beneficiary_total" name="p1_beneficiary_total" class="form-control m-b-1 type_input" type="text" value="" readonly>
+                                <input id="p1_check_payment_period" name="p1_check_payment_period" class="" type="text" value="" readonly>
                             </div>
 
                         </div>
@@ -351,6 +359,7 @@
                             <label class="col-sm-4 control-label">รวม</label>
                             <div class="col-sm-2">
                                 <input id="p2_beneficiary_total" name="p2_beneficiary_total" class="form-control m-b-1 type_input" type="text" value="" readonly>
+                                <input id="p2_check_payment_period" name="p2_check_payment_period" class="" type="text" value="" readonly>
                             </div>
                         </div>
                     </div>
@@ -680,20 +689,20 @@
 
         //Submit request form
         $("#submit_btn").click(function() {
-            $.blockUI({
-				message: 'กรุณารอสักครู่...',
-				css: {
-					border: 'none',
-					padding: '15px',
-					backgroundColor: '#000',
-					'-webkit-border-radius': '10px',
-					'-moz-border-radius': '10px',
-					opacity: .5,
-					color: '#fff'
-				},
-				baseZ: 5000,
-				bindEvents: false
-			});
+            // $.blockUI({
+			// 	message: 'กรุณารอสักครู่...',
+			// 	css: {
+			// 		border: 'none',
+			// 		padding: '15px',
+			// 		backgroundColor: '#000',
+			// 		'-webkit-border-radius': '10px',
+			// 		'-moz-border-radius': '10px',
+			// 		opacity: .5,
+			// 		color: '#fff'
+			// 	},
+			// 	baseZ: 5000,
+			// 	bindEvents: false
+			// });
             var cremation_member_id = $("#member_cremation_id").val();
             if(cremation_member_id == '') {
                 $.unblockUI();
@@ -947,6 +956,27 @@
             format_the_number_decimal(document.getElementById("receive_payment"));
         });
     });
+
+    function calc_period_payment(){
+        $.ajax({
+            url: base_url+"sp_cremation/<?php echo $path;?>/calc_period_payment",
+            method:"post",
+            data: $("#form1").serialize(),
+            dataType:"text",
+            success:function(result) {
+                console.log(result)
+                data = JSON.parse(result);
+
+                $('#p1_beneficiary_total').val(data.p1_total);
+                $('#p2_beneficiary_total').val(data.p2_total);
+                
+            },
+            error: function(xhr){
+                $.unblockUI();
+                console.log('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+            }
+        });
+    }
 
     function to_num(str) {
         return parseFloat(str.replace(/,/g,''));
