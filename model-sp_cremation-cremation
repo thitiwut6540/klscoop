@@ -1104,6 +1104,11 @@ class Cremation extends CI_Model {
     }
 
     public function save_request_money($cremation_id, $req_id, $file_id_arr, $member_cremation_id, $reason, $file_arr) {
+
+        // echo "<pre>";
+        // print_r($_POST);
+        // exit;
+
         $result = array();
         $process_timestamp = date('Y-m-d H:i:s');
 
@@ -1238,6 +1243,80 @@ class Cremation extends CI_Model {
 
                 $result["status"] = "success";
             }
+
+            if(empty($req_id)) {
+                
+                $data_insert = [];
+
+                $p1_period_amount = str_replace(",","",$_POST['p1_beneficiary_total']);
+                $p2_period_amount = str_replace(",","",$_POST['p2_beneficiary_total']);
+
+                if($p1_period_payment > 0){
+                    $rec_no = 0;
+                    $period_payment = 1;
+                    $period_amount  = $p1_period_amount;
+
+                    $data_insert['cremation_id']         = $cremation_id;
+                    $data_insert['request_receive_id']   = $request_id;
+                    $data_insert['period_payment']       = $period_payment;
+                    $data_insert['period_amount']        = $period_amount;
+                    $data_insert['createdatetime']       = date('Y-m-d H:i:s');
+                    $this->db->insert('coop_sp_cremation_receive_period_payment', $data_insert);
+                    $receive_period_id = $this->db->insert_id();
+
+                    foreach($_POST['p1_beneficiary'] as $key => $value){
+
+                        if($value > 0){
+
+                            $rec_no++;
+                            $data_insert = [];
+                            $data_insert['receive_period_id']       = $receive_period_id;
+                            $data_insert['period_receive_number']   = $rec_no;
+                            $data_insert['period_receive']          = $value;
+                            $data_insert['period_amount']           = str_replace(",","",$_POST['p1_beneficiary_amount'][$key]);
+                            $data_insert['createdatetime']          = date('Y-m-d H:i:s');
+                            $this->db->insert('coop_sp_cremation_receive_period_payment_list', $data_insert);
+
+                        }
+                        
+                    }
+                }
+
+                if($p2_period_amount > 0){
+                    $rec_no = 0;
+                    $period_payment = 2;
+                    $period_amount  = $p2_period_amount;
+
+                    $data_insert['cremation_id']         = $cremation_id;
+                    $data_insert['request_receive_id']   = $request_id;
+                    $data_insert['period_payment']       = $period_payment;
+                    $data_insert['period_amount']        = $period_amount;
+                    $data_insert['createdatetime']       = date('Y-m-d H:i:s');
+                    $this->db->insert('coop_sp_cremation_receive_period_payment', $data_insert);
+                    $receive_period_id = $this->db->insert_id();
+
+                    foreach($_POST['p2_beneficiary'] as $key => $value){
+
+                        if($value > 0){
+
+                            $rec_no++;
+                            $data_insert = [];
+                            $data_insert['receive_period_id']       = $receive_period_id;
+                            $data_insert['period_receive_number']   = $rec_no;
+                            $data_insert['period_receive']          = $value;
+                            $data_insert['period_amount']           = str_replace(",","",$_POST['p2_beneficiary_amount'][$key]);
+                            $data_insert['createdatetime']          = date('Y-m-d H:i:s');
+                            $this->db->insert('coop_sp_cremation_receive_period_payment_list', $data_insert);
+
+                        }
+                        
+                    }
+                }
+
+            } else {
+
+            }
+
         } else {
             $result["status"] = "error";
             $result["message"] = "ไม่พบสมาชิกที่ทำรายการ";
