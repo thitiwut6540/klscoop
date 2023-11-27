@@ -778,20 +778,20 @@
 		});
 
 		$("#submit_btn").click(function() {
-			// $.blockUI({
-			// 	message: 'กรุณารอสักครู่...',
-			// 	css: {
-			// 		border: 'none',
-			// 		padding: '15px',
-			// 		backgroundColor: '#000',
-			// 		'-webkit-border-radius': '10px',
-			// 		'-moz-border-radius': '10px',
-			// 		opacity: .5,
-			// 		color: '#fff'
-			// 	},
-			// 	baseZ: 5000,
-			// 	bindEvents: false
-			// });
+			$.blockUI({
+				message: 'กรุณารอสักครู่...',
+				css: {
+					border: 'none',
+					padding: '15px',
+					backgroundColor: '#000',
+					'-webkit-border-radius': '10px',
+					'-moz-border-radius': '10px',
+					opacity: .5,
+					color: '#fff'
+				},
+				baseZ: 5000,
+				bindEvents: false
+			});
 			wraning_message = "";
 			if($("#period_id").val() == '') {
 				wraning_message += " - กรุณาเลือกรอบการสมัคร\n";
