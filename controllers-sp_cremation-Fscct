@@ -7,6 +7,7 @@ class Fscct extends CI_Controller {
         $this->cremation_group_id = 2;
         $this->path = "fscct";
         $this->load->model('Sp_cremation/Cremation', 'cremation');
+        $this->load->model("Sp_cremation/Sp_coop_buy_model", "sp_coop_buy_model");
 	}
 
     public function index() {
@@ -537,9 +538,9 @@ class Fscct extends CI_Controller {
 
         if($id!=""){
             $this->db->where("id", $id);
+            $result['row'] = $this->db->get("coop_sp_cremation_member_type")->row_array();
+            $arr_data['row'] = $result['row'];
         }
-        $result['row'] = $this->db->get("coop_sp_cremation_member_type")->row_array();
-        $arr_data['row'] = $result['row'];
 
         $this->libraries->template('sp_cremation/member_type_setting_form',$arr_data);
     }
@@ -570,6 +571,29 @@ class Fscct extends CI_Controller {
         $this->center_function->toast("บันทึกข้อมูลเรียบร้อยแล้ว");
 	    echo "<script> document.location.href='".base_url(PROJECTPATH.'/sp_cremation/'.$this->path.'/member_type_setting')."' </script>";
     }
+
+
+    public function member_type_setting_delete(){
+
+        $type_id = (int)$_POST['id'];
+
+        if(!empty($type_id)){
+
+            $this->db->where('id', $type_id);
+            $data = $this->db->delete('coop_sp_cremation_member_type');
+
+            if ($data) {
+                $result['action'] = 'Y';
+                echo json_encode($result);
+            } else {
+                $result['action'] = 'N';
+                echo json_encode($result);
+            }
+
+        }
+
+    }
+    
 
     public function add_frm_benefit(){
         $arr_data = array();
@@ -643,4 +667,187 @@ class Fscct extends CI_Controller {
         echo "<script> document.location.href = '".PROJECTPATH."/sp_cremation/fscct/reg?cremation_member_id_input=".$cremation_member_id."' </script>";
 		exit;
 	}
+
+    function sp_coop_account_buy_setting(){ //ตั้งค่าผังและรายการของ รายการรับ-จ่าย
+		$arr_data = array();
+		$data_get = $this->input->get();
+		$flag = $this->db->select("*")->from("coop_sp_cremation")->where("path = '".$this->path."'")->get()->row();
+		$arr_data = $this->sp_coop_buy_model->sp_coop_account_buy_setting_main($data_get,$flag->id);
+		$arr_data['path'] = $this->path;
+		$arr_data['system_flag'] = "1";
+		$arr_data['reference_system_id'] = $flag->id;
+		$this->libraries->template('sp_cremation/sp_coop_buy/coop_account_buy', $arr_data);
+	}
+
+	public function sp_coop_account_buy_save(){ //บันทึกรายการ รับ-จ่าย
+		$data_post = $this->input->post();
+		$flag = $this->db->select("*")->from("coop_sp_cremation")->where("path = '".$this->path."'")->get()->row();
+		$this->sp_coop_buy_model->sp_coop_account_buy_save_main($data_post,$this->path,$flag->id);
+	}
+
+	public function sp_coop_account_buy_excel(){ //บันทึกรายการ รับ-จ่าย
+		$arr_data = array();
+		$row = $this->db->select('coop_sp_cremation_account_buy_list.*,coop_sp_cremation_account_match.account_chart_id')
+						->from('coop_sp_cremation_account_buy_list')
+						->join("coop_sp_cremation_account_match", "coop_sp_cremation_account_buy_list.account_id = coop_sp_cremation_account_match.match_id 
+										AND coop_sp_cremation_account_match.match_type = 'account_buy_list' ", "left")
+						->where("coop_sp_cremation_account_buy_list.status_flag = '1' AND coop_sp_cremation_account_buy_list.system_flag = 1")
+						->order_by("account_id ASC ")
+						->get()->result_array();
+		$arr_data['data'] = $row;
+		
+		$this->db->select(array('*'));
+		$this->db->from('coop_account_chart');
+		$rs_account_chart = $this->db->get()->result_array();
+		$arr_data['rs_account_chart'] = @$rs_account_chart;
+		$arr_data['buy_type_name'] = array('0'=>'รับ','1'=>'จ่าย');
+	
+		$this->load->view('sp_cremation/sp_coop_buy/coop_account_buy_excel',$arr_data);
+	}
+
+	public function sp_del_coop_account_buy_data(){	//ลบรายการรับจ่าย
+		$table = @$_POST['table'];
+		$id = @$_POST['id'];
+		$field = @$_POST['field'];
+
+        $data_update = array();
+        $data_update['status_flag'] = '2';
+        $data_update['updated_at'] = date('Y-m-d H:i:s');
+        $data_update['updated_by'] = $_SESSION['USER_ID'];
+		$this->db->where($field, $id );
+        $this->db->update($table, $data_update);
+		$this->db->where("match_id = '".$id."' AND match_type = 'account_buy_list'");
+        $this->db->update("coop_sp_cremation_account_match", $data_update);
+		$this->center_function->toast("ลบเรียบร้อยแล้ว");
+		echo true;
+	}
+
+	function sp_coop_buy_manage($buy_type,$account_buy_id=null){ //หน้าหลักรายการรับ - จ่าย
+		$arr_data = array();
+		$arr_data = $this->sp_coop_buy_model->sp_coop_buy_manage_main($buy_type,$account_buy_id);
+		//path และ idของแต่ละกรองฌาปนกิจ
+		$arr_data['path'] = $this->path;
+		$flag = $this->db->select("*")->from("coop_sp_cremation")->where("path = '".$this->path."'")->get()->row();
+		$arr_data['system_flag'] = "1";
+		$arr_data['reference_system_id'] = $flag->id;
+		// echo "<pre>";print_r($arr_data);exit;
+		$this->libraries->template('sp_cremation/sp_coop_buy/sp_coop_buy_manage', $arr_data);
+	}
+
+	function sp_save_buy(){ //หน้าบันทึกข้อมูลรายกาารับ-จ่าย
+        $data_post = $this->input->post();
+		$flag = $this->db->select("*")->from("coop_sp_cremation")->where("path = '".$this->path."'")->get()->row();
+		$arr_data['system_flag'] = "1";
+		$arr_data['reference_system_id'] = $flag->id;
+		$this->sp_coop_buy_model->sp_save_buy_main($data_post);
+	}
+
+	function sp_coop_buy_pdf(){ //หน้าใบสำคัญ
+		$arr_data = array();
+		$data_get = $this->input->get();
+		$arr_data = $this->sp_coop_buy_model->sp_coop_buy_pdf_main($data_get);
+		$flag = $this->db->select("*")->from("coop_sp_cremation")->where("path = '".$this->path."'")->get()->row();
+		$arr_data['system_flag'] = "1";
+		$arr_data['reference_system_id'] = $flag->id;
+        $this->load->view('sp_cremation/sp_coop_buy/coop_buy_pdf_new', $arr_data);
+	}
+
+	function search_account_buy(){ //หน้าค้นหาใบสำคัญ
+        $buy_type = ($this->input->post("buy_type") == '')?0:$this->input->post("buy_type");
+        $path_cremation = $this->input->post("path");
+        $this->db->select(array('*'));
+        $this->db->from('coop_sp_cremation_account_buy');
+        $this->db->where("
+            buy_type = {$buy_type}
+            AND (
+                account_buy_number LIKE '%".$this->input->post("search")."%'
+                OR pay_for_description LIKE '%".$this->input->post("search")."%'
+            )
+        ");
+        $this->db->order_by('account_buy_number DESC');
+        $this->db->limit(5);
+        $rs = $this->db->get()->result_array();
+        $output = '';
+
+        $arr_status = array('0'=>'ปกติ','1'=>'ยื่นขอยกเลิก','2'=>'ยกเลิก');
+       if(!empty($rs)){
+            $i= 1;
+            foreach($rs as $key => $row){
+                $pay_type_name = $row['buy_type'] == 0 ? 'รับ' : 'จ่าย';
+                $style_pay_type = $row['buy_type'] == 0 ?'style="color: #82e0aa ;"' : 'style="color: #ec7063 ;"';
+                $style_cancel = $row['account_buy_status'] == 2 ?'style="color: red ;"' : '';
+                $path_type = $row['buy_type'] == 0 ? "receive" : "payment";
+                $output .= '
+                    <tr '.$style_cancel.'> 
+                        <th scope="row">'.str_replace("R","อ",$row['account_buy_number']).'</th>
+                        <td>'.$this->center_function->ConvertToThaiDate($row['buy_date'],'1','0').'</td>
+                        <td class="text-left">'.$row['pay_for_description'].'</td>
+                        <td '.$style_pay_type.'>'.$pay_type_name.'</td>
+                        <td style="text-align: right;">'.number_format($row['total_amount'], 2).'</td>
+                        <td style="text-align: right;">'.@$arr_status[$row['account_buy_status']].'</td>
+                        <td align="right">
+                            <a href="'.base_url(PROJECTPATH.'/sp_cremation'.'/'.$path_cremation.'/sp_coop_buy_manage'.'/'.$path_type."/").$row['account_buy_id'].'">
+                                <button style="padding: 1px 12px;"  id="'.$row['account_buy_id'].'" type="button" class="btn btn-info">เลือก</button>
+                            </a>
+                        </td>
+                    </tr>
+                ';
+           $i++;
+           }
+            echo $output;
+       }else{
+            $output .= '
+                      <tr>
+                           <td align="center" colspan="6"><h1>ไม่พบผลการค้นหา!</h1></td>
+                      </tr>
+                 ';
+            echo $output;
+       }
+       exit;
+	}
+
+	function sp_coop_buy_cancel(){ //ยกเลิกรายการ รับ-จ่าย
+		$arr_data = array();
+		$data_get = @$this->input->get();
+		$arr_data = $this->sp_coop_buy_model->sp_coop_buy_cancel_main($data_get,$this->path);	
+		$arr_data['path'] = $this->path;
+
+        if($this->uri->segment(4)=='0'){
+            $this->libraries->template('sp_cremation/sp_coop_buy/sp_coop_buy_cancel_receive',$arr_data);
+        }else{
+            $this->libraries->template('sp_cremation/sp_coop_buy/sp_coop_buy_cancel_pay',$arr_data);
+        }
+		
+	}
+
+    function calc_period_payment(){
+
+        $total_period_01 = 0;
+        $total_period_02 = 0;
+
+        $period_total_amount = str_replace(",","",$_POST['p_cal_amount']);
+
+        foreach($_POST['p1_beneficiary_amount'] as $key1 => $value1){
+            $total_period_01 += (!empty($value1)) ? $value1 : 0;
+        }
+
+        foreach($_POST['p2_beneficiary_amount'] as $key2 => $value2){
+            $total_period_02 += (!empty($value2)) ? $value2 : 0;
+        }
+
+        $action_period_01 = ($total_period_01 <= $period_total_amount) ? "Y" : "N";
+        $action_period_02 = ($total_period_02 <= $action_period_01) ? "Y" : "N";
+
+        $result['p1_total'] = number_format($total_period_01,2);
+        $result['p2_total'] = number_format($total_period_02,2);
+
+        if($action_period_01 == 'Y' && $action_period_02 == 'Y'){
+            $result['action'] = "Y";
+        } else {
+            $result['action'] = "N";
+        }
+
+        echo json_encode($result);
+
+    }
 }
