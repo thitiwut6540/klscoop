@@ -1,0 +1,100 @@
+<div class="layout-content">
+    <div class="layout-content-body">
+        <style>
+            input[type=number]::-webkit-inner-spin-button,
+            input[type=number]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            th, td {
+                text-align: center;
+            }
+            .modal-dialog-delete {
+                margin:0 auto;
+                width: 350px;
+                margin-top: 8%;
+            }
+            .modal-dialog-account {
+                margin:auto;
+                width: 70%;
+                margin-top:7%;
+            }
+            .control-label {
+                text-align:right;
+                padding-top:5px;
+            }
+            .text_left {
+                text-align:left;
+            }
+            .text_right {
+                text-align:right;
+            }
+        </style>
+        <h1 style="margin-bottom: 0">ตั้งค่าประเภทสมาชิก</h1>
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-l-r-0">
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 padding-l-r-0">
+                <?php $this->load->view('breadcrumb'); ?>
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 padding-l-r-0">
+                <button class="btn btn-primary btn-lg bt-add" type="button" id="add_btn">
+                    <span class="icon icon-plus-circle"></span>
+                    เพิ่มรายการ
+                </button>
+            </div>
+        </div>
+        <div class="row gutter-xs">
+            <div class="col-xs-12 col-md-12">
+                <div class="panel panel-body">
+                    <form method="POST" action="<?php echo base_url(PROJECTPATH.'/sp_cremation/'.$path.'/member_type_setting_form_save'); ?>">
+                    <div class="row">
+                        <div class="col-md-offset-3 col-md-3">
+                            <div class="form-group">
+                                <label for="member_type">ชื่อประเภทสมาชิก :</label>
+                                <input type="text" class="form-control" id="member_type" name="member_type" value="<?php echo $row['member_type'];?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-offset-3 col-md-3">
+                            <div class="form-group">
+                                <label for="fee">เงินสงเคราะห์ศพล่วงหน้า :</label>
+                                <input type="text" class="form-control" id="fee" name="fee" value="<?php echo $row['fee'];?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-offset-3 col-md-3">
+                            <div class="form-group">
+                                <label for="assoc_fee">ค่าธรรมเนียมสมัครใหม่ :</label>
+                                <input type="text" class="form-control" id="assoc_fee" name="assoc_fee" value="<?php echo $row['assoc_fee'];?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-offset-3 col-md-3">
+                            <div class="form-group">
+                                <label for="annual_fee">ค่าบำรุงประจำปี :</label>
+                                <input type="text" class="form-control" id="annual_fee" name="annual_fee" value="<?php echo $row['annual_fee'];?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="display:none;">
+                        <div class="col-md-offset-3 col-md-3">
+                            <div class="form-group">
+                                <label for="other_fee">ค่าใช้จ่ายอื่นๆ :</label>
+                                <input type="text" class="form-control" id="other_fee" name="other_fee" value="<?php echo $row['other_fee'];?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-offset-3 col-md-3 text-center">
+                            <input type="hidden" name="id" value="<?php echo $row['id'];?>">
+                            <button class="btn btn-block btn-sucess" type="submit">บันทึก</button>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
